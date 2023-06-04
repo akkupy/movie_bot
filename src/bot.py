@@ -1,6 +1,6 @@
 from typing import Final
 from os import getenv
-from telegram import Update,InputMediaPhoto,InlineKeyboardButton,InlineKeyboardMarkup
+from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.ext import Application,ContextTypes
 
 import aiohttp
@@ -45,12 +45,7 @@ class Bot:
         print(f'Update {update} caused error {context.error}')
         await update.message.reply_text("Sorry, this movie/show is unknown to me")
 
-   
 
-
-    # @staticmethod
-    # async def empty_memory(update: Update) -> None:
-    #     await update.message.reply_text("My memory is empty😕.\nLook something up! -> /find")
 
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
         print(self.memory)
