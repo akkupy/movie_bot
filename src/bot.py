@@ -111,7 +111,7 @@ class Bot:
                 InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
                 InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
                 [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
-                InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"]))],
+                InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
             ]
             await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
         else:
@@ -121,7 +121,7 @@ class Bot:
             
 
     @staticmethod
-    async def get_trailer_url(imdb_id: str) -> None:
+    async def get_trailer_url(imdb_id: str,Title: str) -> None:
 
         find_TMDB = f'https://api.themoviedb.org/3/find/{imdb_id}?api_key={TMDB_API}&external_source=imdb_id'
 
@@ -133,14 +133,19 @@ class Bot:
                 if data['movie_results'] != []:
                     TMDB_ID = data['movie_results'][0]['id']
                     TYPE = 'movie'
-                else:
+                elif data['tv_results'] != []:
                     TMDB_ID = data['tv_results'][0]['id']
                     TYPE = 'tv'
+                else:
+                    return f'https://www.youtube.com/results?search_query={Title}'
 
             video_TMDB = f'https://api.themoviedb.org/3/{TYPE}/{TMDB_ID}/videos?api_key={TMDB_API}'
             async with session.get(video_TMDB) as response:
                 data = await response.json()
-                video = data['results'][0]['key']
+                if data['results'] != []:
+                    video = data['results'][0]['key']
+                else:
+                    return f'https://www.youtube.com/results?search_query={Title}'
             return YOUTUBE_BASE_URL+video
 
 
