@@ -11,8 +11,8 @@ def main():
 
     bot = Bot()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
-    bot.app.add_handler(CommandHandler('help', bot.help_command))
-    bot.app.add_handler(CommandHandler("find", bot.find_title))
+    # bot.app.add_handler(CommandHandler('help', bot.help_command))
+    bot.app.add_handler(CommandHandler("m", bot.find_title))
     # bot.app.add_handler(CommandHandler("rate", bot.rated))
     # bot.app.add_handler(CommandHandler("rated", bot.rated))
     # bot.app.add_handler(CommandHandler("language", bot.language))

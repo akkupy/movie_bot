@@ -19,33 +19,33 @@ OMDB_API: Final = getenv("OMDB_API")
 
 
 class Bot:
-    HELP_MSG = "Available commands:\n\n" \
-               "    /find [title] [y=year] (/find The Godfather y=1972)\n\n\n" \
-               "After you find a movie, use buttons under it to get more information or " \
-               "use commands to get information about last movie from bot memory:\n\n" \
-               "    /rate|/rated -- movie PG\n" \
-               "    /award|/awards -- awards and nominations\n" \
-               "    /rating|/ratings -- movie ratings\n" \
-               "    /language|/languages -- movie languages\n" \
-               "    /plot -- short plot description\n" \
-               "    /link - IMDB movie page\n"
+    # HELP_MSG = "Available commands:\n\n" \
+    #            "    /find [title] [y=year] (/find The Godfather y=1972)\n\n\n" \
+    #            "After you find a movie, use buttons under it to get more information or " \
+    #            "use commands to get information about last movie from bot memory:\n\n" \
+    #            "    /rate|/rated -- movie PG\n" \
+    #            "    /award|/awards -- awards and nominations\n" \
+    #            "    /rating|/ratings -- movie ratings\n" \
+    #            "    /language|/languages -- movie languages\n" \
+    #            "    /plot -- short plot description\n" \
+    #            "    /link - IMDB movie page\n"
     
     INTRO_MSG = "Heyy I\'m Sarah , Maintained by @akkupy \n" \
-                "Type in /help to get the available commands \n" 
+                "Type in /m <movie-name> to get the Movie Details \n" 
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
 
         # Set up bot memory
-        self.memory: dict = {} 
+        self.memory: list = []
 
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_chat_action(action="typing")
         await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
 
 
-    async def help_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text(self.HELP_MSG)
+    # async def help_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    #     await update.message.reply_text(self.HELP_MSG)
 
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Bot response on not coded text"""
@@ -109,7 +109,8 @@ class Bot:
             }
         async with aiohttp.ClientSession() as session:
             async with session.get(OMDB, params = omdb_params) as response:
-                movie_data = self.memory = await response.json()
+                movie_data = await response.json()
+                self.memory.append(movie_data)
                 if movie_data["Response"] != "False":                      
                     data_str = f"Title:    {movie_data['Title']} ({movie_data['Year']})\n" \
                             f"Genre:    {movie_data['Genre']}\n" \
@@ -125,6 +126,7 @@ class Bot:
                     #InlineKeyboardButton("Trailer", url=self.get_trailer_url(movie_data["imdbID"])),
                     InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings"),
                     InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
+                    InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
                     InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
                     #[InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}")],
                     ]
@@ -167,73 +169,36 @@ class Bot:
             rating_str += f"{rating['Source']}: {rating['Value']}\n"
         return f"{movie_json['Title']} ratings:\n{rating_str}"
 
-    # async def rating(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     if self.memory:
-    #         await update.message.reply_text(self.fetch_rating(self.memory))
-    #     else:
-    #         await self.empty_memory(update)
-
     @staticmethod
     def get_rated(movie_json: dict) -> str:
         return f"{movie_json['Title']} rated:\n{movie_json['Rated']}"
 
-    # async def rated(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     if self.memory:
-    #         await update.message.reply_text(self.get_rated)
-    #     else:
-    #         await self.empty_memory(update)
 
     @staticmethod
     def get_plot(movie_json: dict) -> str:
         return f"{movie_json['Title']} plot:\n{movie_json['Plot']}"
 
-    # async def plot(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     if self.memory:
-    #         await update.message.reply_text(self.get_plot(self.memory))
-    #     else:
-    #         self.empty_memory(update)
 
-    # @property
-    # def get_languages(self) -> str:
-    #     """Movie languages getter"""
-    #     return f"{self.memory['Title']} languages:\n{self.memory['Language']}"
+    @staticmethod
+    def get_languages(movie_json: dict) -> str:
+        return f"{movie_json['Title']} languages:\n{movie_json['Language']}"
 
-    # def language(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     """/language command
-
-    #     Print out available languages of the movie in memory
-    #     """
-    #     self.logger.info("/language called")
-    #     if self.memory:
-    #         update.message.reply_text(self.get_languages)
-    #     else:
-    #         self.empty_memory(update)
 
     @staticmethod
     def get_awards(movie_json: dict) -> str:
         return f"{movie_json['Title']} awards:\n{movie_json['Awards']}"
 
-    # def awards(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     """/awards command
-
-    #     Print out awards of the movie in memory
-    #     """
-    #     self.logger.info("/awards called")
-    #     if self.memory:
-    #         update.message.reply_text(self.get_awards)
-    #     else:
-    #         self.empty_memory(update)
 
     async def query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query.data
         await update.callback_query.answer()
 
         title, kword = query.split(":")
-
-        if title == self.memory["Title"]:
-            data = self.memory
-            print(self.memory)
-            print("Cached")
+        for item in self.memory:
+            if title == item["Title"]:
+                data = item
+                print("Using Cached Data.")
+                break
         else:
             omdb_params = {
                 "apikey": OMDB_API,
@@ -242,7 +207,8 @@ class Bot:
             async with aiohttp.ClientSession() as session:
                 async with session.get(OMDB, params=omdb_params) as result:
                     data = await result.json()
-                    print('api')
+                    self.memory.append(data)
+                    print("Using API data.")
         if kword == "ratings":
             await update.callback_query.message.reply_text(self.get_rating(data))
         elif kword == "plot":
@@ -251,3 +217,5 @@ class Bot:
             await update.callback_query.message.reply_text(self.get_rated(data))
         elif kword == "awards":
             await update.callback_query.message.reply_text(self.get_awards(data))
+        elif kword == "languages":
+            await update.callback_query.message.reply_text(self.get_languages(data))
