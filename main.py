@@ -11,18 +11,8 @@ def main():
 
     bot = Bot()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
-    # bot.app.add_handler(CommandHandler('help', bot.help_command))
-    bot.app.add_handler(CommandHandler("m", bot.find_title))
-    # bot.app.add_handler(CommandHandler("rate", bot.rated))
-    # bot.app.add_handler(CommandHandler("rated", bot.rated))
-    # bot.app.add_handler(CommandHandler("language", bot.language))
-    # bot.app.add_handler(CommandHandler("languages", bot.language))
-    # bot.app.add_handler(CommandHandler("award", bot.awards))
-    # bot.app.add_handler(CommandHandler("awards", bot.awards))
-    # bot.app.add_handler(CommandHandler("plot", bot.plot))
-    # bot.app.add_handler(CommandHandler("rating", bot.rating))
-    # bot.app.add_handler(CommandHandler("ratings", bot.rating))
-    # bot.app.add_handler(CommandHandler("link", bot.link))
+    
+    bot.app.add_handler(CommandHandler("find", bot.find_title))
 
     bot.app.add_handler(MessageHandler(filters.TEXT, bot.any_text))
 

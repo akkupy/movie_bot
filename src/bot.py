@@ -17,21 +17,15 @@ BOT_API: Final = getenv("BOT_API")
 OMDB: Final = "http://www.omdbapi.com"
 OMDB_API: Final = getenv("OMDB_API") 
 
+TMDB_API: Final = getenv("TMDB_API")
+
+IMDB_LINK: Final = "https://www.imdb.com/title/"
+
 
 class Bot:
-    # HELP_MSG = "Available commands:\n\n" \
-    #            "    /find [title] [y=year] (/find The Godfather y=1972)\n\n\n" \
-    #            "After you find a movie, use buttons under it to get more information or " \
-    #            "use commands to get information about last movie from bot memory:\n\n" \
-    #            "    /rate|/rated -- movie PG\n" \
-    #            "    /award|/awards -- awards and nominations\n" \
-    #            "    /rating|/ratings -- movie ratings\n" \
-    #            "    /language|/languages -- movie languages\n" \
-    #            "    /plot -- short plot description\n" \
-    #            "    /link - IMDB movie page\n"
     
     INTRO_MSG = "Heyy I\'m Sarah , Maintained by @akkupy \n" \
-                "Type in /m <movie-name> to get the Movie Details \n" 
+                "Type in /find <movie-name> to get the Movie Details \n" 
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -43,10 +37,6 @@ class Bot:
         await update.message.reply_chat_action(action="typing")
         await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
 
-
-    # async def help_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     await update.message.reply_text(self.HELP_MSG)
-
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         """Bot response on not coded text"""
         await update.message.reply_text(f"Unknown command: {update.message.text} -> /help")
@@ -55,45 +45,15 @@ class Bot:
         print(f'Update {update} caused error {context.error}')
         await update.message.reply_text("Sorry, this movie/show is unknown to me")
 
-    # def handle_response(text: str) -> str:
-    #     processed: str = text.lower()
-
-    #     if 'hello' in processed:
-    #         return 'Hey there!'
-
-    #     if 'how are you' in processed:
-    #         return 'I\'m good!'
-
-    #     if 'i love python' in processed:
-    #         return 'Remember to subscribe!'
-
-    #     return 'I don\'t understand'
+   
 
 
-    # async def handle_message(self,update: Update, context: ContextTypes.DEFAULT_TYPE):
-    #     message_type: str = update.message.chat.type
-    #     text: str = update.message.text
-
-    #     print(f'User ({update.message.chat.id}) in {message_type}: "{text}"')
-
-    #     if message_type == 'group':
-    #         if BOT_USERNAME in text:
-    #             new_text: str = text.replace(BOT_USERNAME, '').strip()
-    #             response: str = self.handle_response(new_text)
-    #         else:
-    #             return  
-    #     else:
-    #         response: str = self.handle_response(text)
-
-    #     print('Bot:', response)
-    #     await update.message.reply_text(response)
-
-
-    @staticmethod
-    async def empty_memory(update: Update) -> None:
-        await update.message.reply_text("My memory is empty😕.\nLook something up! -> /find")
+    # @staticmethod
+    # async def empty_memory(update: Update) -> None:
+    #     await update.message.reply_text("My memory is empty😕.\nLook something up! -> /find")
 
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
+        print(self.memory)
         if "y=" in context.args[-1]:               
             movie_name = " ".join(context.args[:-1])
             omdb_params = {
@@ -107,60 +67,87 @@ class Bot:
                 "apikey": OMDB_API,
                 "t": movie_name,
             }
-        async with aiohttp.ClientSession() as session:
-            async with session.get(OMDB, params = omdb_params) as response:
-                movie_data = await response.json()
-                self.memory.append(movie_data)
-                if movie_data["Response"] != "False":                      
-                    data_str = f"Title:    {movie_data['Title']} ({movie_data['Year']})\n" \
-                            f"Genre:    {movie_data['Genre']}\n" \
-                            f"Rating:    {movie_data['imdbRating']}/10\n" \
-                            f"Runtime:    {movie_data['Runtime']}\n" \
-                            f"Actors:    {movie_data['Actors']}\n" \
-                            f"Director:    {movie_data['Director']}\n"
-                    async with session.get(movie_data["Poster"]) as poster:
-                        await update.message.reply_photo(photo=str(poster.url))
+        
+        for item in self.memory:
+            if movie_name == item["Title"]:
+                movie_data = item
+                print("Using Cached Data.")
+                break
+        else:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(OMDB, params = omdb_params) as response:
+                    movie_data = await response.json()
+                    print("Using API Data")
+                    if movie_data["Response"] != "False": 
+                        self.memory.append(movie_data)  
+        
 
-                    buttons = [
-                    [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']}:plot"),
-                    #InlineKeyboardButton("Trailer", url=self.get_trailer_url(movie_data["imdbID"])),
-                    InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings"),
-                    InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
-                    InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
-                    InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
-                    #[InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}")],
-                    ]
-                    await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
-                else:
-                    await update.message.reply_text("Movie Not Found! Check the spelling.")
+        if movie_data["Response"] != "False":                    
+            data_str = f"Title:    {movie_data['Title']} ({movie_data['Year']})\n" \
+                        f"Genre:    {movie_data['Genre']}\n" \
+                        f"Rating:    {movie_data['imdbRating']}/10\n" \
+                        f"Runtime:    {movie_data['Runtime']}\n" \
+                        f"Actors:    {movie_data['Actors']}\n" \
+                        f"Director:    {movie_data['Director']}\n"
+            
+            if movie_data['Poster'] != 'N/A':
+                await update.message.reply_photo(photo=movie_data['Poster'])
+            else:
+                find_TMDB = f'https://api.themoviedb.org/3/find/{movie_data["imdbID"]}?api_key={TMDB_API}&external_source=imdb_id'
+
+                TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original'
+
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(find_TMDB) as response:
+                        data = await response.json()
+                        if data['movie_results'] != []:
+                            Poster = data['movie_results'][0]['backdrop_path']
+                        else:
+                            Poster = data['tv_results'][0]['backdrop_path']
+
+                URL = str(TMDB_IMAGE_BASE+Poster)
+                await update.message.reply_photo(photo=URL)
+
+
+            buttons = [
+                [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']}:plot"),
+                InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings")],
+                [InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
+                InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
+                InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
+                [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
+                InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"]))],
+            ]
+            await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
+        else:
+            await update.message.reply_text("Movie Not Found! Check the spelling.")
+
+        
             
 
-    # @staticmethod
-    # def get_trailer_url(imdb_id: str) -> str:
-    #     """Return movie youtube trailer url as string
-    #     using IMDB API
-    #     """
-    #     imdb_params = {
-    #         "apiKey": IMDB_API,
-    #         "id": imdb_id
-    #     }
-    #     return requests.get(IMDB_TRAILER_REQ, imdb_params).json()["videoUrl"]
+    @staticmethod
+    async def get_trailer_url(imdb_id: str) -> None:
 
-    # @property
-    # def get_link(self) -> str:
-    #     """Imdb movie link getter"""
-    #     return f"{self.memory['Title']} on IMDB:\n{IMDB_LINK}{self.memory['imdbID']}"
+        find_TMDB = f'https://api.themoviedb.org/3/find/{imdb_id}?api_key={TMDB_API}&external_source=imdb_id'
 
-    # def link(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    #     """/link command
+        YOUTUBE_BASE_URL = 'https://www.youtube.com/watch?v='
 
-    #     Print out IMDB link of the movie in memory
-    #     """
-    #     self.logger.info("/link called")
-    #     if self.memory:
-    #         update.message.reply_text(self.get_link)
-    #     else:
-    #         self.empty_memory(update)
+        async with aiohttp.ClientSession() as session:
+            async with session.get(find_TMDB) as response:
+                data = await response.json()
+                if data['movie_results'] != []:
+                    TMDB_ID = data['movie_results'][0]['id']
+                    TYPE = 'movie'
+                else:
+                    TMDB_ID = data['tv_results'][0]['id']
+                    TYPE = 'tv'
+
+            video_TMDB = f'https://api.themoviedb.org/3/{TYPE}/{TMDB_ID}/videos?api_key={TMDB_API}'
+            async with session.get(video_TMDB) as response:
+                data = await response.json()
+                video = data['results'][0]['key']
+            return YOUTUBE_BASE_URL+video
+
 
     @staticmethod
     def get_rating(movie_json: dict) -> str:
