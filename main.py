@@ -12,7 +12,7 @@ def main():
     bot = Bot()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
     bot.app.add_handler(CommandHandler('help', bot.help_command))
-    # bot.app.add_handler(CommandHandler("find", bot.find_title))
+    bot.app.add_handler(CommandHandler("find", bot.find_title))
     # bot.app.add_handler(CommandHandler("rate", bot.rated))
     # bot.app.add_handler(CommandHandler("rated", bot.rated))
     # bot.app.add_handler(CommandHandler("language", bot.language))
@@ -28,7 +28,7 @@ def main():
 
     bot.app.add_error_handler(bot.error)
 
-    # bot.app.add_handler(CallbackQueryHandler(bot.query_handler))
+    bot.app.add_handler(CallbackQueryHandler(bot.query_handler))
 
     print('Polling...')
     
