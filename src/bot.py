@@ -1,7 +1,7 @@
 from typing import Final
 from os import getenv
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes,Updater
+from telegram.ext import Application,ContextTypes
 import asyncio
 
 from dotenv import load_dotenv,find_dotenv
@@ -45,6 +45,10 @@ class Bot:
 
     async def help_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_text(self.HELP_MSG)
+
+    async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        """Bot response on not coded text"""
+        await update.message.reply_text(f"Unknown command: {update.message.text} -> /help")
 
 
 

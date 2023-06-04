@@ -3,7 +3,7 @@ __license__ = "GNU GPL v.3"
 __maintainer__ = "Akkupy"
 __status__ = "Maintenance"
 
-from telegram.ext import CommandHandler,MessageHandler,filters,CallbackQueryHandler
+from telegram.ext import CommandHandler,MessageHandler,filters,CallbackQueryHandler,PrefixHandler
 
 from src import Bot
 
@@ -24,7 +24,7 @@ def main():
     # bot.app.add_handler(CommandHandler("ratings", bot.rating))
     # bot.app.add_handler(CommandHandler("link", bot.link))
 
-    # bot.app.add_handler(MessageHandler(filters.TEXT, handle_message))
+    bot.app.add_handler(MessageHandler(filters.TEXT, bot.any_text))
 
     bot.app.add_error_handler(bot.error)
 
