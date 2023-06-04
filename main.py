@@ -9,6 +9,19 @@ from src import Bot
 
 def main():
 
+    print(r'''
+     __       _       _           
+    /  \     | |     | | 
+   /    \    | | /\  | | /\   _   _
+  /  /\  \   | |/ /  | |/ /  | | | |  
+ /  ____  \  | |\ \  | |\ \  | |_| |
+/__/    \__\ |_| \_\ |_| \_\  \___/  ''')
+    print("\n*************************************")
+    print("\n* Copyright of akkupy, 2023         *")
+    print("\n* https://www.github.com/akkupy     *")
+    print("\n* https://t.me/akkupy               *")
+    print("\n*************************************\n\n\n")
+
     bot = Bot()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
 
@@ -20,7 +33,7 @@ def main():
 
     bot.app.add_handler(CallbackQueryHandler(bot.query_handler))
 
-    print('Polling...')
+    print('Bot Started Polling! Check Terminal for Errors')
     
     bot.app.run_polling(poll_interval=3)
 

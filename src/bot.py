@@ -48,7 +48,6 @@ class Bot:
 
 
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
-        print(self.memory)
         if "y=" in context.args[-1]:               
             movie_name = " ".join(context.args[:-1])
             omdb_params = {
@@ -64,15 +63,13 @@ class Bot:
             }
         
         for item in self.memory:
-            if movie_name == item["Title"]:
+            if movie_name == item["Title"].lower() or movie_name == item['Title']:
                 movie_data = item
-                print("Using Cached Data.")
                 break
         else:
             async with aiohttp.ClientSession() as session:
                 async with session.get(OMDB, params = omdb_params) as response:
                     movie_data = await response.json()
-                    print("Using API Data")
                     if movie_data["Response"] != "False": 
                         self.memory.append(movie_data)  
         
@@ -184,7 +181,6 @@ class Bot:
         for item in self.memory:
             if title == item["Title"]:
                 data = item
-                print("Using Cached Data.")
                 break
         else:
             omdb_params = {
@@ -195,7 +191,6 @@ class Bot:
                 async with session.get(OMDB, params=omdb_params) as result:
                     data = await result.json()
                     self.memory.append(data)
-                    print("Using API data.")
         if kword == "ratings":
             await update.callback_query.message.reply_text(self.get_rating(data))
         elif kword == "plot":
