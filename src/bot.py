@@ -38,8 +38,9 @@ class Bot:
         await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
 
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        """Bot response on not coded text"""
-        await update.message.reply_text(f"Unknown command: {update.message.text} -> /help")
+        message_type: str = update.message.chat.type
+        if message_type != 'group':
+            await update.message.reply_text(f"Unknown command: {update.message.text} -> To Search Movie use : /find <movie_name>")
 
     async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f'Update {update} caused error {context.error}')
