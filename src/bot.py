@@ -49,6 +49,8 @@ class Bot:
 
 
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
+        if len(self.memory) == 25:
+            self.memory = []
         if "y=" in context.args[-1]:               
             movie_name = " ".join(context.args[:-1])
             omdb_params = {
