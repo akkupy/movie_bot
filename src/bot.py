@@ -2,23 +2,25 @@ from typing import Final
 from os import getenv
 from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.ext import Application,ContextTypes
-
 import aiohttp
-
 from dotenv import load_dotenv,find_dotenv
 
 print('Starting up bot...')
 
 load_dotenv(find_dotenv())
 
+# Telegram Bot
 BOT_USERNAME: Final = getenv("BOT_USERNAME")
 BOT_API: Final = getenv("BOT_API")
 
+#OMDB
 OMDB: Final = "http://www.omdbapi.com"
 OMDB_API: Final = getenv("OMDB_API") 
 
+#TMDB
 TMDB_API: Final = getenv("TMDB_API")
 
+#IMDB
 IMDB_LINK: Final = "https://www.imdb.com/title/"
 
 
@@ -33,21 +35,24 @@ class Bot:
         # Set up bot memory
         self.memory: list = []
 
+    # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_chat_action(action="typing")
         await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
 
+    # Replying to text other than commands
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message_type: str = update.message.chat.type
         if message_type != 'group':
             await update.message.reply_text(f"Unknown command: {update.message.text} -> To Search Movie use : /find <movie_name>")
 
+    # Error Handling
     async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f'Update {update} caused error {context.error}')
         await update.message.reply_text("Sorry, this movie/show is unknown to me")
 
 
-
+    # /find command
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
         if len(self.memory) == 25:
             self.memory = []
@@ -175,7 +180,7 @@ class Bot:
     def get_awards(movie_json: dict) -> str:
         return f"{movie_json['Title']} awards:\n{movie_json['Awards']}"
 
-
+    # Query Handler
     async def query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         query = update.callback_query.data
         await update.callback_query.answer()
