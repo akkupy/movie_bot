@@ -35,6 +35,8 @@ class Botz:
         # Set up bot memory
         self.memory: list = []
 
+        self.movie_memory:list = []
+
     # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_chat_action(action="typing")
@@ -43,7 +45,7 @@ class Botz:
     # Replying to text other than commands
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message_type: str = update.message.chat.type
-        if message_type != 'group':
+        if message_type not in ['group','supergroup']:
             await update.message.reply_text(f"Unknown command: {update.message.text} -> To Search Movie use : /find <movie_name>")
 
     # Error Handling
@@ -120,6 +122,22 @@ class Botz:
                 InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
             ]
             await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
+
+            Flag = False
+            for item in self.movie_memory:
+                if movie_data['imdbID'] == item["imdb_id"]:
+                    file_data = item
+                    break
+
+            else:
+                Flag = True
+
+            if not Flag:
+                from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
+
+                to_chat_id = update.message.chat.id
+
+                await update.message._bot.forward_message(to_chat_id,from_chat_id,message_id)
         else:
             await update.message.reply_text("Movie Not Found! Check the spelling.")
 
@@ -214,10 +232,43 @@ class Botz:
 
     async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
 
-        message_id = update.message.reply_to_message.id
-        chat_id = update.message.chat.id
+        imdb_id = "".join(context.args)
 
-        print(message_id,chat_id)
+        if imdb_id == "":
+            await update.message.reply_text('Enter the Movie/Series IMDB id along with /save. Go to /help for more details.')
 
-        # await update.message._bot.forward_message(34535,chat_id,message_id)
-        print("yo")
+
+        elif update.message.reply_to_message == None: 
+            await update.message.reply_text('Use this command as a reply to the file to be saved. Go to /help for more details.')
+        else:
+            message_id = update.message.reply_to_message.id
+
+            from_chat_id = update.message.chat.id
+
+            self.movie_memory.append({
+                'imdb_id' : imdb_id,
+                'from_chat_id' : from_chat_id,
+                'message_id' : message_id,
+            })
+
+            await update.message.reply_text('Movie/Series saved on database. ')
+
+    async def movie_remover(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
+
+        imdb_id = "".join(context.args)
+
+        if imdb_id == "":
+            await update.message.reply_text('Enter the Movie/Series IMDB id along with /remove. Go to /help for more details.')
+
+        else:
+            count = 0
+            for item in self.movie_memory:
+                count+=1
+                if imdb_id == item["imdb_id"]:
+                    del self.movie_memory[count-1]
+                    await update.message.reply_text('Movie/Series removed from database.')
+                    break
+
+            else:
+                await update.message.reply_text('Movie/Series not found on database.')
+            
