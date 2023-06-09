@@ -24,7 +24,7 @@ TMDB_API: Final = getenv("TMDB_API")
 IMDB_LINK: Final = "https://www.imdb.com/title/"
 
 
-class Bot:
+class Botz:
     
     INTRO_MSG = "Heyy I\'m Sarah , Maintained by @akkupy \n" \
                 "Type in /find <movie-name> to get the Movie Details \n" 
@@ -88,7 +88,8 @@ class Bot:
                         f"Rating:    {movie_data['imdbRating']}/10\n" \
                         f"Runtime:    {movie_data['Runtime']}\n" \
                         f"Actors:    {movie_data['Actors']}\n" \
-                        f"Director:    {movie_data['Director']}\n"
+                        f"Director:    {movie_data['Director']}\n" \
+                        f"IMDB ID:    {movie_data['imdbID']}\n"
             
             if movie_data['Poster'] != 'N/A':
                 await update.message.reply_photo(photo=movie_data['Poster'])
@@ -209,3 +210,14 @@ class Bot:
             await update.callback_query.message.reply_text(self.get_awards(data))
         elif kword == "languages":
             await update.callback_query.message.reply_text(self.get_languages(data))
+
+
+    async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
+
+        message_id = update.message.reply_to_message.id
+        chat_id = update.message.chat.id
+
+        print(message_id,chat_id)
+
+        # await update.message._bot.forward_message(34535,chat_id,message_id)
+        print("yo")

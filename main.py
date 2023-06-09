@@ -5,7 +5,7 @@ __status__ = "Maintenance"
 
 from telegram.ext import CommandHandler,MessageHandler,filters,CallbackQueryHandler
 
-from src import Bot
+from src import Botz
 
 def main():
 
@@ -22,10 +22,12 @@ def main():
     print("\n* https://t.me/akkupy               *")
     print("\n*************************************\n\n\n")
 
-    bot = Bot()
+    bot = Botz()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
 
     bot.app.add_handler(CommandHandler("find", bot.find_title))
+
+    bot.app.add_handler(CommandHandler("save", bot.movie_saver))
 
     bot.app.add_handler(MessageHandler(filters.TEXT, bot.any_text))
 
@@ -36,8 +38,6 @@ def main():
     print('Bot Started Polling! Check Terminal for Errors')
     
     bot.app.run_polling(poll_interval=3)
-
-
 
 
 
