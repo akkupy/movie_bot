@@ -123,11 +123,14 @@ class Botz:
                         data = await response.json()
                         if data['movie_results'] != []:
                             Poster = data['movie_results'][0]['backdrop_path']
-                        else:
+                            URL = str(TMDB_IMAGE_BASE+Poster)
+                            await update.message.reply_photo(photo=URL)
+                        elif data['tv_results'] != []:
                             Poster = data['tv_results'][0]['backdrop_path']
-
-                URL = str(TMDB_IMAGE_BASE+Poster)
-                await update.message.reply_photo(photo=URL)
+                            URL = str(TMDB_IMAGE_BASE+Poster)
+                            await update.message.reply_photo(photo=URL)
+                    
+                
 
 
             buttons = [
