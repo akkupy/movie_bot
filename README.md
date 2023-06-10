@@ -13,6 +13,13 @@
 * IMDB Links.
 * Information On TV Series.
 
+# Prerequisite
+
+* [Python 3.11+](https://www.python.org/downloads/)
+* [Telegram Bot API](https://telegram.me/BotFather)
+* [OMDB API](https://www.omdbapi.com/)
+* [TMDB API](https://developer.themoviedb.org/reference/intro/getting-started)
+* [MySQL Server](https://www.mysql.com/)
 
 # Self-hosting (For Devs)
 
