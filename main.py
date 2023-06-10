@@ -25,6 +25,8 @@ def main():
     bot = Botz()
     bot.app.add_handler(CommandHandler('start', bot.start_command))
 
+    bot.app.add_handler(CommandHandler('help', bot.help_command))
+
     bot.app.add_handler(CommandHandler("find", bot.find_title))
 
     bot.app.add_handler(CommandHandler("save", bot.movie_saver))

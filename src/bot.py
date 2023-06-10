@@ -36,6 +36,15 @@ class Botz:
     
     INTRO_MSG = "Heyy I\'m Sarah , Maintained by @akkupy \n" \
                 "Type in /find <movie-name> to get the Movie Details \n" 
+    
+    HELP_MSG = "Available commands:\n\n" \
+               " /start - Gives the intro.\n\n" \
+               " /help - Lists the available commands.\n\n" \
+               " /find [title] [y=year] (/find The Godfather y=1972)\n" \
+               "    After you find a movie, use buttons under it to get more information \n\n" \
+               " /save [IMDB id] (/save tt1477834) - Saves the replied message/file in the database with the given imdb id. \n" \
+               "    Use /find command to find the IMDB id for a movie/tv show. \n\n" \
+               " /remove [IMDB id] (/remove tt1477834) - Removes the file of the specified imdb id from the database.\n" \
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -56,6 +65,10 @@ class Botz:
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_chat_action(action="typing")
         await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
+
+    # /help command
+    async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        await update.message.reply_text(self.HELP_MSG)
 
     # Replying to text other than commands
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
