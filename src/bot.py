@@ -35,6 +35,7 @@ class Botz:
         # Set up bot memory
         self.memory: list = []
 
+        # Set up bot movie file cache memory
         self.movie_memory:list = []
 
     # /start command
@@ -85,13 +86,13 @@ class Botz:
         
 
         if movie_data["Response"] != "False":                    
-            data_str = f"Title:    {movie_data['Title']} ({movie_data['Year']})\n" \
-                        f"Genre:    {movie_data['Genre']}\n" \
-                        f"Rating:    {movie_data['imdbRating']}/10\n" \
-                        f"Runtime:    {movie_data['Runtime']}\n" \
-                        f"Actors:    {movie_data['Actors']}\n" \
-                        f"Director:    {movie_data['Director']}\n" \
-                        f"IMDB ID:    {movie_data['imdbID']}\n"
+            data_str =  f"🎬 Title:    {movie_data['Title']} ({movie_data['Year']})\n\n" \
+                        f"📖 Genre:    {movie_data['Genre']}\n\n" \
+                        f"⭐ Rating:    {movie_data['imdbRating']}/10\n\n" \
+                        f"🕤 Runtime:    {movie_data['Runtime']}\n\n" \
+                        f"🎭 Actors:    {movie_data['Actors']}\n\n" \
+                        f"🧑 Director:    {movie_data['Director']}\n\n" \
+                        f"🆔 IMDB ID:    {movie_data['imdbID']}\n\n"
             
             if movie_data['Poster'] != 'N/A':
                 await update.message.reply_photo(photo=movie_data['Poster'])
