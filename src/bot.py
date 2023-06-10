@@ -34,17 +34,30 @@ CREATE_TABLE: Final = getenv("CREATE_TABLE",True)
 
 class Botz:
     
-    INTRO_MSG = "Heyy I\'m Sarah , Maintained by @akkupy \n" \
-                "Type in /find <movie-name> to get the Movie Details \n" 
+    INTRO_MSG = "*Heyy I\'m Sarah , Maintained by @akkupy \n" \
+                "Type in /help for the list of available commands* \n" 
     
-    HELP_MSG = "Available commands:\n\n" \
-               " /start - Gives the intro.\n\n" \
-               " /help - Lists the available commands.\n\n" \
-               " /find [title] [y=year] (/find The Godfather y=1972)\n" \
-               "    After you find a movie, use buttons under it to get more information \n\n" \
-               " /save [IMDB id] (/save tt1477834) - Saves the replied message/file in the database with the given imdb id. \n" \
-               "    Use /find command to find the IMDB id for a movie/tv show. \n\n" \
-               " /remove [IMDB id] (/remove tt1477834) - Removes the file of the specified imdb id from the database.\n" \
+    HELP_MSG = "*Available commands:*\n\n" \
+               " */start*\n" \
+               "     - Gives the intro.\n\n" \
+               " */help*\n" \
+               "     - Lists the available commands.\n\n" \
+               " */find* [title] or */find* [title] [y=year]\n" \
+               "     - Gives the details of the movie/tvshow specified. \n" \
+               "     - Enter the movie name as argument of /find command. \n" \
+               "     - Use buttons under it to get more information. \n" \
+               "     - eg: /find The Godfather , /find The Godfather y=1972\n\n" \
+               " */save* [IMDB id]\n" \
+               "     - Enter the imdb id of the movie/tvshow as argument.\n " \
+               "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
+               "     - Saves the replied message/file in the database with the given imdb id.\n " \
+               "     - Always use this command as a reply to the file to be saved.\n " \
+               "     - eg: /save tt1477834\n\n" \
+               " */remove* [IMDB id]\n" \
+               "     - Enter the imdb id of the movie/tvshow as argument.\n " \
+               "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
+               "     - Removes the file of the specified imdb id from the database.\n" \
+               "     - eg: /remove tt1477834\n" \
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -64,11 +77,11 @@ class Botz:
     # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         await update.message.reply_chat_action(action="typing")
-        await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG)
+        await update.message.reply_photo(photo="https://raw.githubusercontent.com/AkkuPY/Sara-Bot/main/Assets/Sara_Bot.jpg",caption=self.INTRO_MSG,parse_mode='markdown')
 
     # /help command
     async def help_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        await update.message.reply_text(self.HELP_MSG)
+        await update.message.reply_text(self.HELP_MSG,parse_mode='markdown')
 
     # Replying to text other than commands
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -120,13 +133,13 @@ class Botz:
             
 
             if movie_data["Response"] != "False":                    
-                data_str =  f"🎬 Title:    {movie_data['Title']} ({movie_data['Year']})\n\n" \
-                            f"📖 Genre:    {movie_data['Genre']}\n\n" \
-                            f"⭐ Rating:    {movie_data['imdbRating']}/10\n\n" \
-                            f"🕤 Runtime:    {movie_data['Runtime']}\n\n" \
-                            f"🎭 Actors:    {movie_data['Actors']}\n\n" \
-                            f"🧑 Director:    {movie_data['Director']}\n\n" \
-                            f"🆔 IMDB ID:    {movie_data['imdbID']}\n\n"
+                data_str =  f"🎬 *Title:*    {movie_data['Title']} ({movie_data['Year']})\n\n" \
+                            f"📖 *Genre:*    {movie_data['Genre']}\n\n" \
+                            f"⭐ *Rating:*    {movie_data['imdbRating']}/10\n\n" \
+                            f"🕤 *Runtime:*    {movie_data['Runtime']}\n\n" \
+                            f"🎭 *Actors:*    {movie_data['Actors']}\n\n" \
+                            f"🧑 *Director:*    {movie_data['Director']}\n\n" \
+                            f"🆔 *IMDB ID:*    {movie_data['imdbID']}\n\n"
                 
                 if movie_data['Poster'] != 'N/A':
                     await update.message.reply_photo(photo=movie_data['Poster'])
@@ -156,7 +169,7 @@ class Botz:
                     [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
                     InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
                 ]
-                await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
+                await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons),parse_mode='markdown')
 
                 Flag = False
                 for item in self.movie_memory:
@@ -228,26 +241,26 @@ class Botz:
         rating_str: str = ""
         for rating in movie_json["Ratings"]:
             rating_str += f"{rating['Source']}: {rating['Value']}\n"
-        return f"{movie_json['Title']} ratings:\n{rating_str}"
+        return f"*{movie_json['Title']} Ratings* ⭐\n\n{rating_str}"
 
     @staticmethod
     def get_rated(movie_json: dict) -> str:
-        return f"{movie_json['Title']} rated:\n{movie_json['Rated']}"
+        return f"*{movie_json['Title']} Rated* 🔞\n\n{movie_json['Rated']}"
 
 
     @staticmethod
     def get_plot(movie_json: dict) -> str:
-        return f"{movie_json['Title']} plot:\n{movie_json['Plot']}"
+        return f"*{movie_json['Title']} Plot* 📖\n\n{movie_json['Plot']}"
 
 
     @staticmethod
     def get_languages(movie_json: dict) -> str:
-        return f"{movie_json['Title']} languages:\n{movie_json['Language']}"
+        return f"*{movie_json['Title']} Languages* 🗣️\n\n{movie_json['Language']}"
 
 
     @staticmethod
     def get_awards(movie_json: dict) -> str:
-        return f"{movie_json['Title']} awards:\n{movie_json['Awards']}"
+        return f"*{movie_json['Title']} Awards* 🏆\n\n{movie_json['Awards']}"
 
     # Query Handler
     async def query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -269,15 +282,15 @@ class Botz:
                     data = await result.json()
                     self.memory.append(data)
         if kword == "ratings":
-            await update.callback_query.message.reply_text(self.get_rating(data))
+            await update.callback_query.message.reply_text(self.get_rating(data),parse_mode='markdown')
         elif kword == "plot":
-            await update.callback_query.message.reply_text(self.get_plot(data))
+            await update.callback_query.message.reply_text(self.get_plot(data),parse_mode='markdown')
         elif kword == "rated":
-            await update.callback_query.message.reply_text(self.get_rated(data))
+            await update.callback_query.message.reply_text(self.get_rated(data),parse_mode='markdown')
         elif kword == "awards":
-            await update.callback_query.message.reply_text(self.get_awards(data))
+            await update.callback_query.message.reply_text(self.get_awards(data),parse_mode='markdown')
         elif kword == "languages":
-            await update.callback_query.message.reply_text(self.get_languages(data))
+            await update.callback_query.message.reply_text(self.get_languages(data),parse_mode='markdown')
 
 
     async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
