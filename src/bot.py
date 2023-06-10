@@ -37,27 +37,29 @@ class Botz:
     INTRO_MSG = "*Heyy I\'m Sarah , Maintained by @akkupy \n" \
                 "Type in /help for the list of available commands* \n" 
     
-    HELP_MSG = "*Available commands:*\n\n" \
+    HELP_MSG = "*AVAILABLE COMMANDS*\n\n" \
                " */start*\n" \
                "     - Gives the intro.\n\n" \
                " */help*\n" \
                "     - Lists the available commands.\n\n" \
-               " */find* [title] or */find* [title] [y=year]\n" \
+               " */find <title> OR */find* <title> <y=year>*\n" \
                "     - Gives the details of the movie/tvshow specified. \n" \
                "     - Enter the movie name as argument of /find command. \n" \
                "     - Use buttons under it to get more information. \n" \
                "     - eg: /find The Godfather , /find The Godfather y=1972\n\n" \
-               " */save* [IMDB id]\n" \
+               " */save <IMDB id>*\n" \
                "     - Enter the imdb id of the movie/tvshow as argument.\n " \
                "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
                "     - Saves the replied message/file in the database with the given imdb id.\n " \
                "     - Always use this command as a reply to the file to be saved.\n " \
                "     - eg: /save tt1477834\n\n" \
-               " */remove* [IMDB id]\n" \
+               " */remove <IMDB id>*\n" \
                "     - Enter the imdb id of the movie/tvshow as argument.\n " \
                "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
                "     - Removes the file of the specified imdb id from the database.\n" \
-               "     - eg: /remove tt1477834\n" \
+               "     - eg: /remove tt1477834\n\n" \
+               " */list_db*\n" \
+               "     - Specifies the number of movies/series currently indexed on database.\n" \
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -338,4 +340,10 @@ class Botz:
                 if imdb_id == item["imdb_id"]:
                     del self.movie_memory[count]
                 count+=1
+
+    async def movie_list(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
+
+        self.cursor.execute("select count(*) from movie_data")
+        number = self.cursor.fetchone()[0]
+        await update.message.reply_text(f'{number} Movies/Series found on database. ')
             
