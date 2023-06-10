@@ -4,6 +4,7 @@ from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.ext import Application,ContextTypes
 import aiohttp
 from dotenv import load_dotenv,find_dotenv
+import mysql.connector as msc
 
 print('Starting up bot...')
 
@@ -23,6 +24,13 @@ TMDB_API: Final = getenv("TMDB_API")
 #IMDB
 IMDB_LINK: Final = "https://www.imdb.com/title/"
 
+#MySQL
+MYSQL_HOST: Final = getenv("MYSQL_HOST")
+MYSQL_USER: Final = getenv("MYSQL_USER")
+MYSQL_PASSWORD: Final = getenv("MYSQL_PASSWORD")
+MYSQL_DATABASE: Final = getenv("MYSQL_DATABASE")
+CREATE_TABLE: Final = getenv("CREATE_TABLE",True)
+
 
 class Botz:
     
@@ -37,6 +45,12 @@ class Botz:
 
         # Set up bot movie file cache memory
         self.movie_memory:list = []
+
+        # Set up Mysql Database
+        self.connection = msc.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD, database=MYSQL_DATABASE)
+        self.cursor = self.connection.cursor()
+        if CREATE_TABLE == 'True':
+            self.cursor.execute("Create table movie_data(imdb_id varchar(20),from_chat_id varchar(20),message_id varchar(20))")
 
     # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -59,6 +73,9 @@ class Botz:
     async def find_title(self, update: Update, context: ContextTypes.DEFAULT_TYPE ) -> None:
         if len(self.memory) == 25:
             self.memory = []
+        if len(self.movie_memory) == 25:
+            self.movie_memory = []
+
         if "y=" in context.args[-1]:               
             movie_name = " ".join(context.args[:-1])
             omdb_params = {
@@ -131,8 +148,23 @@ class Botz:
                     break
 
             else:
-                Flag = True
-
+                self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
+                if self.cursor.fetchone()[0] != 0:
+                    self.cursor.execute("select * from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
+                    data = self.cursor.fetchone()
+                    file_data = {
+                        'imdb_id' : data[0],
+                        'from_chat_id' : data[1],
+                        'message_id' : data[2],
+                    }
+                    self.movie_memory.append({
+                        'imdb_id' : data[0],
+                        'from_chat_id' : data[1],
+                        'message_id' : data[2],
+                    })
+                else:
+                    Flag = True
+                
             if not Flag:
                 from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
 
@@ -246,13 +278,13 @@ class Botz:
 
             from_chat_id = update.message.chat.id
 
-            self.movie_memory.append({
-                'imdb_id' : imdb_id,
-                'from_chat_id' : from_chat_id,
-                'message_id' : message_id,
-            })
-
-            await update.message.reply_text('Movie/Series saved on database. ')
+            self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(imdb_id))
+            if self.cursor.fetchone()[0] == 0:
+                self.cursor.execute("insert into movie_data values('{}',{},{})".format(imdb_id,from_chat_id,message_id))
+                self.connection.commit()
+                await update.message.reply_text('Movie/Series saved on database. ')
+            else:
+                await update.message.reply_text('Movie/Series already present on database. ')
 
     async def movie_remover(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
 
@@ -262,14 +294,18 @@ class Botz:
             await update.message.reply_text('Enter the Movie/Series IMDB id along with /remove. Go to /help for more details.')
 
         else:
+
+            self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(imdb_id))
+            if self.cursor.fetchone()[0] != 0:
+                self.cursor.execute("delete from movie_data where imdb_id = '{}'".format(imdb_id))
+                self.connection.commit()
+                await update.message.reply_text('Movie/Series deleted from database. ')
+            else:
+                await update.message.reply_text('Movie/Series not found on database. ')
+
             count = 0
             for item in self.movie_memory:
-                count+=1
                 if imdb_id == item["imdb_id"]:
-                    del self.movie_memory[count-1]
-                    await update.message.reply_text('Movie/Series removed from database.')
-                    break
-
-            else:
-                await update.message.reply_text('Movie/Series not found on database.')
+                    del self.movie_memory[count]
+                count+=1
             
