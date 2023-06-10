@@ -11,6 +11,8 @@ httpcore==0.17.2
 httpx==0.24.1
 idna==3.4
 multidict==6.0.4
+mysql-connector-python==8.0.33
+protobuf==3.20.3
 python-dotenv==1.0.0
 python-telegram-bot==20.3
 sniffio==1.3.0
