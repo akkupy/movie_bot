@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+  telebot:
+    env_file:
+      - env
+    image: telebot:v1
+    container_name: telebot
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=Asia/Kolkata
+    restart: unless-stopped
