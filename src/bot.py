@@ -76,106 +76,107 @@ class Botz:
         if len(self.movie_memory) == 25:
             self.movie_memory = []
 
-        if "y=" in context.args[-1]:               
-            movie_name = " ".join(context.args[:-1])
-            omdb_params = {
-                "apikey": OMDB_API,
-                "t": movie_name,
-                "y": context.args[-1][2:]
-            }
-        else:
-            movie_name = " ".join(context.args)
-            omdb_params = {
-                "apikey": OMDB_API,
-                "t": movie_name,
-            }
-        
-        for item in self.memory:
-            if movie_name == item["Title"].lower() or movie_name == item['Title']:
-                movie_data = item
-                break
-        else:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(OMDB, params = omdb_params) as response:
-                    movie_data = await response.json()
-                    if movie_data["Response"] != "False": 
-                        self.memory.append(movie_data)  
-        
+        if "".join(context.args) == "":
+            await update.message.reply_text('Enter the Movie/Series name along with /find. Go to /help for more details.')
 
-        if movie_data["Response"] != "False":                    
-            data_str =  f"🎬 Title:    {movie_data['Title']} ({movie_data['Year']})\n\n" \
-                        f"📖 Genre:    {movie_data['Genre']}\n\n" \
-                        f"⭐ Rating:    {movie_data['imdbRating']}/10\n\n" \
-                        f"🕤 Runtime:    {movie_data['Runtime']}\n\n" \
-                        f"🎭 Actors:    {movie_data['Actors']}\n\n" \
-                        f"🧑 Director:    {movie_data['Director']}\n\n" \
-                        f"🆔 IMDB ID:    {movie_data['imdbID']}\n\n"
+        else:
+            if "y=" in context.args[-1]:               
+                movie_name = " ".join(context.args[:-1])
+                omdb_params = {
+                    "apikey": OMDB_API,
+                    "t": movie_name,
+                    "y": context.args[-1][2:]
+                }
+            else:
+                movie_name = " ".join(context.args)
+                omdb_params = {
+                    "apikey": OMDB_API,
+                    "t": movie_name,
+                }
             
-            if movie_data['Poster'] != 'N/A':
-                await update.message.reply_photo(photo=movie_data['Poster'])
-            else:
-                find_TMDB = f'https://api.themoviedb.org/3/find/{movie_data["imdbID"]}?api_key={TMDB_API}&external_source=imdb_id'
-
-                TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original'
-
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(find_TMDB) as response:
-                        data = await response.json()
-                        if data['movie_results'] != []:
-                            Poster = data['movie_results'][0]['backdrop_path']
-                            URL = str(TMDB_IMAGE_BASE+Poster)
-                            await update.message.reply_photo(photo=URL)
-                        elif data['tv_results'] != []:
-                            Poster = data['tv_results'][0]['backdrop_path']
-                            URL = str(TMDB_IMAGE_BASE+Poster)
-                            await update.message.reply_photo(photo=URL)
-                    
-                
-
-
-            buttons = [
-                [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']}:plot"),
-                InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings")],
-                [InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
-                InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
-                InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
-                [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
-                InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
-            ]
-            await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
-
-            Flag = False
-            for item in self.movie_memory:
-                if movie_data['imdbID'] == item["imdb_id"]:
-                    file_data = item
+            for item in self.memory:
+                if movie_name == item["Title"].lower() or movie_name == item['Title']:
+                    movie_data = item
                     break
-
             else:
-                self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
-                if self.cursor.fetchone()[0] != 0:
-                    self.cursor.execute("select * from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
-                    data = self.cursor.fetchone()
-                    file_data = {
-                        'imdb_id' : data[0],
-                        'from_chat_id' : data[1],
-                        'message_id' : data[2],
-                    }
-                    self.movie_memory.append({
-                        'imdb_id' : data[0],
-                        'from_chat_id' : data[1],
-                        'message_id' : data[2],
-                    })
-                else:
-                    Flag = True
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(OMDB, params = omdb_params) as response:
+                        movie_data = await response.json()
+                        if movie_data["Response"] != "False": 
+                            self.memory.append(movie_data)  
+            
+
+            if movie_data["Response"] != "False":                    
+                data_str =  f"🎬 Title:    {movie_data['Title']} ({movie_data['Year']})\n\n" \
+                            f"📖 Genre:    {movie_data['Genre']}\n\n" \
+                            f"⭐ Rating:    {movie_data['imdbRating']}/10\n\n" \
+                            f"🕤 Runtime:    {movie_data['Runtime']}\n\n" \
+                            f"🎭 Actors:    {movie_data['Actors']}\n\n" \
+                            f"🧑 Director:    {movie_data['Director']}\n\n" \
+                            f"🆔 IMDB ID:    {movie_data['imdbID']}\n\n"
                 
-            if not Flag:
-                from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
+                if movie_data['Poster'] != 'N/A':
+                    await update.message.reply_photo(photo=movie_data['Poster'])
+                else:
+                    find_TMDB = f'https://api.themoviedb.org/3/find/{movie_data["imdbID"]}?api_key={TMDB_API}&external_source=imdb_id'
 
-                to_chat_id = update.message.chat.id
+                    TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/original'
 
-                await update.message._bot.forward_message(to_chat_id,from_chat_id,message_id)
-        else:
-            await update.message.reply_text("Movie Not Found! Check the spelling.")
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(find_TMDB) as response:
+                            data = await response.json()
+                            if data['movie_results'] != []:
+                                Poster = data['movie_results'][0]['backdrop_path']
+                                URL = str(TMDB_IMAGE_BASE+Poster)
+                                await update.message.reply_photo(photo=URL)
+                            elif data['tv_results'] != []:
+                                Poster = data['tv_results'][0]['backdrop_path']
+                                URL = str(TMDB_IMAGE_BASE+Poster)
+                                await update.message.reply_photo(photo=URL)
+                        
+                buttons = [
+                    [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']}:plot"),
+                    InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings")],
+                    [InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
+                    InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
+                    InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
+                    [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
+                    InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
+                ]
+                await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons))
+
+                Flag = False
+                for item in self.movie_memory:
+                    if movie_data['imdbID'] == item["imdb_id"]:
+                        file_data = item
+                        break
+
+                else:
+                    self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
+                    if self.cursor.fetchone()[0] != 0:
+                        self.cursor.execute("select * from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
+                        data = self.cursor.fetchone()
+                        file_data = {
+                            'imdb_id' : data[0],
+                            'from_chat_id' : data[1],
+                            'message_id' : data[2],
+                        }
+                        self.movie_memory.append({
+                            'imdb_id' : data[0],
+                            'from_chat_id' : data[1],
+                            'message_id' : data[2],
+                        })
+                    else:
+                        Flag = True
+                    
+                if not Flag:
+                    from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
+
+                    to_chat_id = update.message.chat.id
+
+                    await update.message._bot.forward_message(to_chat_id,from_chat_id,message_id)
+            else:
+                await update.message.reply_text("Movie Not Found! Check the spelling.")
 
         
             
