@@ -39,6 +39,11 @@ $ python(3) main.py
     [-] OMDB_API :   OMDB Api Token
     [-] BOT_USERNAME : Telegram Bot Username
     [-] TMDB_API : TMDB Api Token
+    [-] MYSQL_HOST = MySQL Server Host
+    [-] MYSQL_USER = MySQL User
+    [-] MYSQL_PASSWORD = MySQL Password
+    [-] MYSQL_DATABASE = MySQL Database Name
+    [-] CREATE_TABLE = True/False (Set to True if tables doesn't exist.)
  
 [+] The Sara will not work without setting the environment variables.
 ```
@@ -51,6 +56,11 @@ BOT_API = "sd78g6add897s8d7f875adad768d"
 BOT_USERNAME = "akkubot"
 OMDB_API = "d3w35frsd34scv"
 TMDB_API = "dwa3r43rfsd344r4"
+MYSQL_HOST = '10.1.1.50'
+MYSQL_USER = 'root'
+MYSQL_PASSWORD = 'root'
+MYSQL_DATABASE = 'telegram'
+CREATE_TABLE = False
 ```
 
 
