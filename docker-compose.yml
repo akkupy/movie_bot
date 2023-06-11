@@ -1,11 +1,11 @@
 version: '3'
 
 services:
-  telebot:
+  movie_bot:
     env_file:
       - env
-    image: telebot:v1
-    container_name: telebot
+    image: akkupy/movie_bot:latest
+    container_name: movie_bot
     environment:
       - PUID=1000
       - PGID=1000

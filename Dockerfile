@@ -4,7 +4,6 @@ ADD requirements.txt /app/requirements.txt
 
 RUN apk update && apk upgrade
 RUN apk add --no-cache bash\
-                       git \
     && rm -rf /var/cache/apk/*
 
 RUN set -ex \
