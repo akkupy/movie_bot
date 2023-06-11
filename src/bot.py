@@ -60,6 +60,11 @@ class Botz:
                "     - eg: /remove tt1477834\n\n" \
                " */list_db*\n" \
                "     - Specifies the number of movies/series currently indexed on database.\n" \
+               
+    MOVIE_NOT_FOUND_MSG = "*{} is not currently Indexed on my database. 😔*\n\n" \
+                "If you have this movie on your chat or in other groups , \n" \
+                "    - Forward that movie into my chat or into this group and ,  \n" \
+                "    - Use '*/save {}*' as a reply to that movie file to save the movie on my database. \n" 
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -170,39 +175,10 @@ class Botz:
                     InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
                     [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
                     InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
+                    [InlineKeyboardButton("Get Movie", callback_data=f"{movie_data['Title']}:getmovie")]
                 ]
                 await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons),parse_mode='markdown')
 
-                Flag = False
-                for item in self.movie_memory:
-                    if movie_data['imdbID'] == item["imdb_id"]:
-                        file_data = item
-                        break
-
-                else:
-                    self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
-                    if self.cursor.fetchone()[0] != 0:
-                        self.cursor.execute("select * from movie_data where imdb_id = '{}'".format(movie_data['imdbID']))
-                        data = self.cursor.fetchone()
-                        file_data = {
-                            'imdb_id' : data[0],
-                            'from_chat_id' : data[1],
-                            'message_id' : data[2],
-                        }
-                        self.movie_memory.append({
-                            'imdb_id' : data[0],
-                            'from_chat_id' : data[1],
-                            'message_id' : data[2],
-                        })
-                    else:
-                        Flag = True
-                    
-                if not Flag:
-                    from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
-
-                    to_chat_id = update.message.chat.id
-
-                    await update.message._bot.forward_message(to_chat_id,from_chat_id,message_id)
             else:
                 await update.message.reply_text("Movie Not Found! Check the spelling.")
 
@@ -263,6 +239,41 @@ class Botz:
     @staticmethod
     def get_awards(movie_json: dict) -> str:
         return f"*{movie_json['Title']} Awards* 🏆\n\n{movie_json['Awards']}"
+    
+
+    @staticmethod
+    def get_movie(self,movie_json: dict) -> str:
+        Flag = False
+        for item in self.movie_memory:
+            if movie_json['imdbID'] == item["imdb_id"]:
+                file_data = item
+                break
+
+        else:
+            self.cursor.execute("select count(*) from movie_data where imdb_id = '{}'".format(movie_json['imdbID']))
+            if self.cursor.fetchone()[0] != 0:
+                self.cursor.execute("select * from movie_data where imdb_id = '{}'".format(movie_json['imdbID']))
+                data = self.cursor.fetchone()
+                file_data = {
+                    'imdb_id' : data[0],
+                    'from_chat_id' : data[1],
+                    'message_id' : data[2],
+                }
+                self.movie_memory.append({
+                    'imdb_id' : data[0],
+                    'from_chat_id' : data[1],
+                    'message_id' : data[2],
+                })
+            else:
+                Flag = True
+                from_chat_id = message_id = None
+                return from_chat_id,message_id
+                    
+        if not Flag:
+            from_chat_id,message_id = file_data['from_chat_id'],file_data['message_id']
+            return from_chat_id,message_id
+
+        
 
     # Query Handler
     async def query_handler(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -293,6 +304,12 @@ class Botz:
             await update.callback_query.message.reply_text(self.get_awards(data),parse_mode='markdown')
         elif kword == "languages":
             await update.callback_query.message.reply_text(self.get_languages(data),parse_mode='markdown')
+        elif kword == "getmovie":
+            from_chat_id,message_id = self.get_movie(self,data)
+            if from_chat_id == None:
+                await update.callback_query.message.reply_text(self.MOVIE_NOT_FOUND_MSG.format(data['Title'],data["imdbID"]),parse_mode='markdown')
+            else:
+                await update.callback_query.message._bot.forward_message(update.callback_query.message.chat.id,from_chat_id,message_id)
 
 
     async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
