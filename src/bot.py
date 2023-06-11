@@ -34,7 +34,7 @@ CREATE_TABLE: Final = getenv("CREATE_TABLE",True)
 
 class Botz:
     
-    INTRO_MSG = "*Heyy I\'m Sarah , Maintained by @akkupy \n" \
+    INTRO_MSG = "*Heyy I\'m Sara , A Movie Bot \n" \
                 "Type in /help for the list of available commands* \n" 
     
     HELP_MSG = "*AVAILABLE COMMANDS*\n\n" \
