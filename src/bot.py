@@ -168,14 +168,14 @@ class Botz:
                                 await update.message.reply_photo(photo=URL)
                         
                 buttons = [
-                    [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']}:plot"),
-                    InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']}:ratings")],
-                    [InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']}:awards"),
-                    InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']}:languages"),
-                    InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']}:rated")],
+                    [InlineKeyboardButton("Plot", callback_data=f"{movie_data['Title']};plot"),
+                    InlineKeyboardButton("Ratings", callback_data=f"{movie_data['Title']};ratings")],
+                    [InlineKeyboardButton("Awards", callback_data=f"{movie_data['Title']};awards"),
+                    InlineKeyboardButton("Languages", callback_data=f"{movie_data['Title']};languages"),
+                    InlineKeyboardButton("Rated", callback_data=f"{movie_data['Title']};rated")],
                     [InlineKeyboardButton("IMDB page", url=f"{IMDB_LINK}{movie_data['imdbID']}"),
                     InlineKeyboardButton("Trailer", url=await self.get_trailer_url(movie_data["imdbID"],movie_data['Title']))],
-                    [InlineKeyboardButton("Get Movie", callback_data=f"{movie_data['Title']}:getmovie")]
+                    [InlineKeyboardButton("Get Movie", callback_data=f"{movie_data['Title']};getmovie")]
                 ]
                 await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons),parse_mode='markdown')
 
@@ -280,7 +280,7 @@ class Botz:
         query = update.callback_query.data
         await update.callback_query.answer()
 
-        title, kword = query.split(":")
+        title, kword = query.split(";")
         for item in self.memory:
             if title == item["Title"]:
                 data = item
@@ -312,7 +312,7 @@ class Botz:
                 await update.callback_query.message._bot.forward_message(update.callback_query.message.chat.id,from_chat_id,message_id)
 
 
-    async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
+    async def movie_saver(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:                                                                                                                                                                                                       
 
         imdb_id = "".join(context.args)
 
