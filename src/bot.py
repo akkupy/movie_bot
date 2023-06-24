@@ -76,7 +76,7 @@ class Botz:
         self.movie_memory:list = []
 
         # Set up Mysql Database
-        self.connection = msc.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD, database=MYSQL_DATABASE,ssl_disabled = True)
+        self.connection = msc.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWORD, database=MYSQL_DATABASE)
         self.cursor = self.connection.cursor()
         if CREATE_TABLE == 'True':
             self.cursor.execute("Create table movie_data(imdb_id varchar(20),from_chat_id varchar(20),message_id varchar(20))")
