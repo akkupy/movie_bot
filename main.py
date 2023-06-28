@@ -35,6 +35,8 @@ def main():
 
     bot.app.add_handler(CommandHandler("list_db", bot.movie_list))
 
+    bot.app.add_handler(CommandHandler("reboot", bot.reboot))
+
     bot.app.add_handler(MessageHandler(filters.TEXT, bot.any_text))
 
     bot.app.add_error_handler(bot.error)

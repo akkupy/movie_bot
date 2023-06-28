@@ -1,10 +1,12 @@
 from typing import Final
-from os import getenv
+from os import getenv,execl
+import sys
 from telegram import Update,InlineKeyboardButton,InlineKeyboardMarkup
 from telegram.ext import Application,ContextTypes
 import aiohttp
 from dotenv import load_dotenv,find_dotenv
 import mysql.connector as msc
+import time
 
 print('Starting up bot...')
 
@@ -80,6 +82,12 @@ class Botz:
         self.cursor = self.connection.cursor()
         if CREATE_TABLE == 'True':
             self.cursor.execute("Create table movie_data(imdb_id varchar(20),from_chat_id varchar(20),message_id varchar(20))")
+
+    async def reboot(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  
+        msg = await update.message.reply_text('Rebooting the bot. Please wait ...')
+        time.sleep(5)
+        await msg.edit_text('Bot Rebooted !!!')
+        execl(sys.executable, f'"{sys.executable}"', *sys.argv)
 
     # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
