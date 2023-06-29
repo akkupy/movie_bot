@@ -33,7 +33,11 @@ def main():
 
     bot.app.add_handler(CommandHandler("remove", bot.movie_remover))
 
-    bot.app.add_handler(CommandHandler("list_db", bot.movie_list))
+    bot.app.add_handler(CommandHandler("list", bot.movie_list))
+
+    bot.app.add_handler(CommandHandler("reboot", bot.reboot))
+
+    bot.app.add_handler(CommandHandler("status", bot.status))
 
     bot.app.add_handler(MessageHandler(filters.TEXT, bot.any_text))
 
