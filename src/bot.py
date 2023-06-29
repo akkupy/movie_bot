@@ -44,30 +44,39 @@ class Botz:
                 "Type in /help for the list of available commands* \n" 
     
     HELP_MSG = "*AVAILABLE COMMANDS*\n\n" \
-               " */start*\n" \
-               "     - Gives the intro.\n\n" \
-               " */help*\n" \
-               "     - Lists the available commands.\n\n" \
-               " */status*\n" \
-               "     - Returns the status of the bot.\n\n" \
-               " */find <title> OR */find* <title> <y=year>*\n" \
-               "     - Gives the details of the movie/tvshow specified. \n" \
-               "     - Enter the movie name as argument of /find command. \n" \
-               "     - Use buttons under it to get more information. \n" \
-               "     - eg: /find The Godfather , /find The Godfather y=1972\n\n" \
-               " */save <IMDB id>*\n" \
-               "     - Enter the imdb id of the movie/tvshow as argument.\n " \
-               "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
-               "     - Saves the replied message/file in the database with the given imdb id.\n " \
-               "     - Always use this command as a reply to the file to be saved.\n " \
-               "     - eg: /save tt1477834\n\n" \
-               " */remove <IMDB id>*\n" \
-               "     - Enter the imdb id of the movie/tvshow as argument.\n " \
-               "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
-               "     - Removes the file of the specified imdb id from the database.\n" \
-               "     - eg: /remove tt1477834\n\n" \
-               " */list*\n" \
-               "     - Returns the number of movies/series currently indexed on database.\n" \
+               " * Command :* /start\n" \
+               " * Description :* Gives the intro.\n\n" \
+               " * Command :* /help\n" \
+               " * Description :* Lists the available commands.\n\n" \
+               " * Command :* /status\n" \
+               " * Description :* Returns the status of the bot.\n\n" \
+               " * Command :* /find movie-name \n" \
+               " * Description :* " \
+               " Gives the details of the movie/tvshow specified." \
+               " Enter the movie name as argument of /find command." \
+               " Use buttons under it to get more information. \n" \
+               " eg: /find The Godfather \n\n" \
+               " * Command :* /find movie-name y=year\n" \
+               " * Description :* " \
+               " Gives the details of the movie/tvshow specified." \
+               " Enter the movie name and year as argument of /find command." \
+               " Use buttons under it to get more information. \n" \
+               " eg: /find The Godfather y=1972\n\n" \
+               " * Command :* /save IMDB-id \n" \
+               " * Description :* " \
+               " Enter the imdb id of the movie/tvshow as argument." \
+               " Use /find command to find the IMDB id for a movie/tv show." \
+               " Saves the replied message/file in the database with the given imdb id." \
+               " Always use this command as a reply to the file to be saved.\n " \
+               " eg: /save tt1477834\n\n" \
+               " * Command :* /remove IMDB-id \n" \
+               " * Description :* " \
+               " Enter the imdb id of the movie/tvshow as argument." \
+               " Use /find command to find the IMDB id for a movie/tv show." \
+               " Removes the file of the specified imdb id from the database.\n" \
+               " eg: /remove tt1477834\n\n" \
+               " * Command :* /list \n" \
+               " * Description :* Returns the number of movies/series currently indexed on database.\n" \
                
     MOVIE_NOT_FOUND_MSG = "*{} is not currently Indexed on my database. 😔*\n\n" \
                 "If you have this movie on your chat or in other groups , \n" \
