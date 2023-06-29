@@ -85,7 +85,11 @@ class Botz:
                 "*TMDB :* {} \n" \
                 "*TMDB Latency :* {} \n" 
 
+    MOVIE_NOT_FOUND = "*Movie/Series NOT FOUND. \n" \
+                "Check the spelling.* \n"
 
+    FIND_MSG = "*Enter the Movie/Series NAME along with /find. \n" \
+            "Go to /help for more details.* \n"  
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -182,7 +186,7 @@ class Botz:
             self.movie_memory = []
 
         if "".join(context.args) == "":
-            await update.message.reply_text('Enter the Movie/Series name along with /find. Go to /help for more details.')
+            await update.message.reply_text(self.FIND_MSG,parse_mode='markdown')
 
         else:
             if "y=" in context.args[-1]:               
@@ -252,7 +256,8 @@ class Botz:
                 await update.message.reply_text(data_str, reply_markup=InlineKeyboardMarkup(buttons),parse_mode='markdown')
 
             else:
-                await update.message.reply_text("Movie Not Found! Check the spelling.")
+                await update.message.reply_chat_action(action="typing")
+                await update.message.reply_photo(photo='https://raw.githubusercontent.com/akkupy/movie_bot/main/assets/check_spelling.jpg',caption=self.MOVIE_NOT_FOUND,parse_mode='markdown')
 
         
             
