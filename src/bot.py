@@ -19,10 +19,12 @@ BOT_API: Final = getenv("BOT_API")
 
 #OMDB
 OMDB: Final = "http://www.omdbapi.com"
+OMDB_SITE: Final = "www.omdbapi.com"
 OMDB_API: Final = getenv("OMDB_API") 
 
 #TMDB
 TMDB_API: Final = getenv("TMDB_API")
+TMDB_SITE: Final = "api.themoviedb.org"
 
 #IMDB
 IMDB_LINK: Final = "https://www.imdb.com/title/"
@@ -74,12 +76,15 @@ class Botz:
 
     REBOOT_SUCCESS_MESSAGE = "Sara is Back 😃"
 
-    PING_MESSAGE = "*Sara is Alive.* 😃 \n\n" \
+    STATUS_MESSAGE = "*Sara is Alive.* 😃 \n\n" \
                 "*Database Status :* {} \n" \
                 "*Database Latency :* {} \n" \
                 "*Movies Available :* {} \n\n" \
                 "*OMDB :* {} \n" \
-                "*TMDB :* {} \n" 
+                "*OMDB Latency :* {} \n\n" \
+                "*TMDB :* {} \n" \
+                "*TMDB Latency :* {} \n" 
+
 
 
     def __init__(self) -> None:
@@ -124,6 +129,7 @@ class Botz:
                 movie_data = await response.json()
                 if movie_data["Response"] != "False":
                     omdb_status = "API Available.✅"
+                    omdb_latency = str(round(measure_latency(host=OMDB_SITE, timeout=2.5)[0])) + "ms ⏱️"
 
                     find_TMDB = f'https://api.themoviedb.org/3/find/{movie_data["imdbID"]}?api_key={TMDB_API}&external_source=imdb_id'
 
@@ -132,14 +138,18 @@ class Botz:
                             data = await response.json()
                             if 'success' not in data.keys():
                                 tmdb_status = "API Available ✅"
+                                tmdb_latency = str(round(measure_latency(host=TMDB_SITE, timeout=2.5)[0])) + "ms ⏱️"
                             else:
                                 tmdb_status = "API Unavailable ❌"
+                                tmdb_latency = "N/A ❌"
                            
                 else:
                     omdb_status = "API Unavailable.❌"
+                    omdb_latency = "N/A ❌"
                     tmdb_status = "API Unavailable.❌"
+                    tmdb_latency = "N/A ❌"
         
-        await update.message.reply_text(self.PING_MESSAGE.format(db_status,db_latency,movie_number,omdb_status,tmdb_status),parse_mode='markdown')
+        await update.message.reply_text(self.STATUS_MESSAGE.format(db_status,db_latency,movie_number,omdb_status,omdb_latency,tmdb_status,tmdb_latency),parse_mode='markdown')
         
 
 
