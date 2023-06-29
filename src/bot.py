@@ -48,6 +48,8 @@ class Botz:
                "     - Gives the intro.\n\n" \
                " */help*\n" \
                "     - Lists the available commands.\n\n" \
+               " */status*\n" \
+               "     - Returns the status of the bot.\n\n" \
                " */find <title> OR */find* <title> <y=year>*\n" \
                "     - Gives the details of the movie/tvshow specified. \n" \
                "     - Enter the movie name as argument of /find command. \n" \
@@ -64,8 +66,8 @@ class Botz:
                "     - Use /find command to find the IMDB id for a movie/tv show. \n" \
                "     - Removes the file of the specified imdb id from the database.\n" \
                "     - eg: /remove tt1477834\n\n" \
-               " */list_db*\n" \
-               "     - Specifies the number of movies/series currently indexed on database.\n" \
+               " */list*\n" \
+               "     - Returns the number of movies/series currently indexed on database.\n" \
                
     MOVIE_NOT_FOUND_MSG = "*{} is not currently Indexed on my database. 😔*\n\n" \
                 "If you have this movie on your chat or in other groups , \n" \
