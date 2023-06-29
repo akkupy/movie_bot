@@ -7,6 +7,7 @@ import aiohttp
 from dotenv import load_dotenv,find_dotenv
 import mysql.connector as msc
 import time
+from tcp_latency import measure_latency
 
 print('Starting up bot...')
 
@@ -28,6 +29,7 @@ IMDB_LINK: Final = "https://www.imdb.com/title/"
 
 #MySQL
 MYSQL_HOST: Final = getenv("MYSQL_HOST")
+MYSQL_PORT: Final = 3306
 MYSQL_USER: Final = getenv("MYSQL_USER")
 MYSQL_PASSWORD: Final = getenv("MYSQL_PASSWORD")
 MYSQL_DATABASE: Final = getenv("MYSQL_DATABASE")
@@ -67,6 +69,18 @@ class Botz:
                 "If you have this movie on your chat or in other groups , \n" \
                 "    - Forward that movie into my chat or into this group and ,  \n" \
                 "    - Use '*/save {}*' as a reply to that movie file to save the movie on my database. \n" 
+    
+    REBOOT_WAIT_MESSAGE = "Rebooting Sara. Please wait ⏲️" 
+
+    REBOOT_SUCCESS_MESSAGE = "Sara is Back 😃"
+
+    PING_MESSAGE = "*Sara is Alive.* 😃 \n\n" \
+                "*Database Status :* {} \n" \
+                "*Database Latency :* {} \n" \
+                "*Movies Available :* {} \n\n" \
+                "*OMDB :* {} \n" \
+                "*TMDB :* {} \n" 
+
 
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
@@ -84,10 +98,50 @@ class Botz:
             self.cursor.execute("Create table movie_data(imdb_id varchar(20),from_chat_id varchar(20),message_id varchar(20))")
 
     async def reboot(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:  
-        msg = await update.message.reply_text('Rebooting the bot. Please wait ...')
+        msg = await update.message.reply_text(self.REBOOT_WAIT_MESSAGE)
         time.sleep(5)
-        await msg.edit_text('Bot Rebooted !!!')
+        await msg.edit_text(self.REBOOT_SUCCESS_MESSAGE)
         execl(sys.executable, f'"{sys.executable}"', *sys.argv)
+
+    async def status(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None: 
+        if self.connection.is_connected():
+            db_status = "Connected ✅"
+            db_latency = str(round(measure_latency(host=MYSQL_HOST, port=MYSQL_PORT, timeout=2.5)[0])) + "ms ⏱️"
+            self.cursor.execute("select count(*) from movie_data")
+            movie_number = str(self.cursor.fetchone()[0]) + ' 🎬'
+        else:
+            db_status = "Disconnected ❌" 
+            db_latency = "N/A ❌"
+            movie_number = "N/A ❌"
+
+        omdb_params = {
+            "apikey": OMDB_API,
+            "t": '2012',
+        }
+
+        async with aiohttp.ClientSession() as session:
+            async with session.get(OMDB, params = omdb_params) as response:
+                movie_data = await response.json()
+                if movie_data["Response"] != "False":
+                    omdb_status = "API Available.✅"
+
+                    find_TMDB = f'https://api.themoviedb.org/3/find/{movie_data["imdbID"]}?api_key={TMDB_API}&external_source=imdb_id'
+
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(find_TMDB) as response:
+                            data = await response.json()
+                            if 'success' not in data.keys():
+                                tmdb_status = "API Available ✅"
+                            else:
+                                tmdb_status = "API Unavailable ❌"
+                           
+                else:
+                    omdb_status = "API Unavailable.❌"
+                    tmdb_status = "API Unavailable.❌"
+        
+        await update.message.reply_text(self.PING_MESSAGE.format(db_status,db_latency,movie_number,omdb_status,tmdb_status),parse_mode='markdown')
+        
+
 
     # /start command
     async def start_command(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
