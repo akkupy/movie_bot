@@ -90,7 +90,19 @@ class Botz:
 
     FIND_MSG = "*Enter the Movie/Series NAME along with /find. \n" \
             "Go to /help for more details.* \n"  
+    
+    INVALID_FIND_MSG = "*Unknown command : {}* \n" \
+            "*To Search Movie use : /find <movie_name>* \n"
 
+    SAVE_MSG = "*Enter the Movie/Series IMDB ID along with /save. \n" \
+            "Go to /help for more details.* \n"
+    
+    SAVE_REPLY_MSG = "*Use this command as a reply to the file to be saved. \n" \
+            "Go to /help for more details.* \n"
+    
+    REMOVE_MSG = "*Enter the Movie/Series IMDB ID along with /remove. \n" \
+            "Go to /help for more details.* \n"
+    
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
 
@@ -170,12 +182,12 @@ class Botz:
     async def any_text(self, update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         message_type: str = update.message.chat.type
         if message_type not in ['group','supergroup']:
-            await update.message.reply_text(f"Unknown command: {update.message.text} -> To Search Movie use : /find <movie_name>")
+            await update.message.reply_text(self.INVALID_FIND_MSG.format(update.message.text),parse_mode='markdown')
 
     # Error Handling
     async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         print(f'Update {update} caused error {context.error}')
-        await update.message.reply_text("Sorry, this movie/show is unknown to me")
+        await update.message.reply_text("*Sorry, this movie/show is unknown to me*",parse_mode='markdown')
 
 
     # /find command
@@ -394,11 +406,11 @@ class Botz:
         imdb_id = "".join(context.args)
 
         if imdb_id == "":
-            await update.message.reply_text('Enter the Movie/Series IMDB id along with /save. Go to /help for more details.')
+            await update.message.reply_text(self.SAVE_MSG,parse_mode='markdown')
 
 
         elif update.message.reply_to_message == None: 
-            await update.message.reply_text('Use this command as a reply to the file to be saved. Go to /help for more details.')
+            await update.message.reply_text(self.SAVE_REPLY_MSG,parse_mode='markdown')
         else:
             message_id = update.message.reply_to_message.id
 
@@ -408,16 +420,16 @@ class Botz:
             if self.cursor.fetchone()[0] == 0:
                 self.cursor.execute("insert into movie_data values('{}',{},{})".format(imdb_id,from_chat_id,message_id))
                 self.connection.commit()
-                await update.message.reply_text('Movie/Series saved on database. ')
+                await update.message.reply_text('*Movie/Series saved on database.*\n',parse_mode='markdown')
             else:
-                await update.message.reply_text('Movie/Series already present on database. ')
+                await update.message.reply_text('*Movie/Series already present on database.*\n',parse_mode='markdown')
 
     async def movie_remover(self,update: Update,context: ContextTypes.DEFAULT_TYPE) -> None:
 
         imdb_id = "".join(context.args)
 
         if imdb_id == "":
-            await update.message.reply_text('Enter the Movie/Series IMDB id along with /remove. Go to /help for more details.')
+            await update.message.reply_text(self.REMOVE_MSG,parse_mode='markdown')
 
         else:
 
@@ -425,9 +437,9 @@ class Botz:
             if self.cursor.fetchone()[0] != 0:
                 self.cursor.execute("delete from movie_data where imdb_id = '{}'".format(imdb_id))
                 self.connection.commit()
-                await update.message.reply_text('Movie/Series deleted from database. ')
+                await update.message.reply_text('*Movie/Series deleted from database.*\n',parse_mode='markdown')
             else:
-                await update.message.reply_text('Movie/Series not found on database. ')
+                await update.message.reply_text('*Movie/Series not found on database.*\n',parse_mode='markdown')
 
             count = 0
             for item in self.movie_memory:
@@ -439,5 +451,5 @@ class Botz:
 
         self.cursor.execute("select count(*) from movie_data")
         number = self.cursor.fetchone()[0]
-        await update.message.reply_text(f'{number} Movies/Series found on database. ')
+        await update.message.reply_text(f'*{number} Movies/Series 🎬 found on database.*',parse_mode='markdown')
             
