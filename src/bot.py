@@ -114,6 +114,8 @@ class Botz:
     REMOVE_MSG = "*Enter the Movie/Series IMDB ID along with /remove. \n" \
             "Go to /help for more details.* \n"
     
+    CHECK_STATUS_MSG = "Gathering data. Please wait ⏲️"  
+
     def __init__(self) -> None:
         self.app = Application.builder().token(BOT_API).build()
 
@@ -135,7 +137,8 @@ class Botz:
         await msg.edit_text(self.REBOOT_SUCCESS_MESSAGE)
         execl(sys.executable, f'"{sys.executable}"', *sys.argv)
 
-    async def status(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None: 
+    async def status(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        message = await update.message.reply_text(self.CHECK_STATUS_MSG) 
         if self.connection.is_connected():
             db_status = "Connected ✅"
             db_latency = str(round(measure_latency(host=MYSQL_HOST, port=MYSQL_PORT, timeout=2.5)[0])) + "ms ⏱️"
@@ -176,7 +179,7 @@ class Botz:
                     tmdb_status = "API Unavailable.❌"
                     tmdb_latency = "N/A ❌"
         
-        await update.message.reply_text(self.STATUS_MESSAGE.format(db_status,db_latency,movie_number,omdb_status,omdb_latency,tmdb_status,tmdb_latency),parse_mode='markdown')
+        await message.edit_text(self.STATUS_MESSAGE.format(db_status,db_latency,movie_number,omdb_status,omdb_latency,tmdb_status,tmdb_latency),parse_mode='markdown')
         
 
 
