@@ -199,9 +199,9 @@ class Botz:
             await update.message.reply_text(self.INVALID_FIND_MSG.format(update.message.text),parse_mode='markdown')
 
     # Error Handling
-    async def error(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
-        print(f'Update {update} caused error {context.error}')
-        await update.message.reply_text("*Sorry, this movie/show is unknown to me*",parse_mode='markdown')
+    async def error(self,update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+        print(f'\nUpdate\n{update.message}\n\ncaused error {context.error}')
+        await update.message.reply_text("*Sorry, Sara encountered an error.*",parse_mode='markdown')
 
 
     # /find command
