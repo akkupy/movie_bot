@@ -1,5 +1,5 @@
 <p align="center"><a href="https://akkupy.me"><img src="https://github.com/akkupy/Sara-Bot/blob/main/Assets/Sara_Bot.jpg" width="5000"></a></p> 
-<h1 align="center"><b>SARA-BOT  🇮🇳 </b></h1>
+<h1 align="center"><b>SARA-BOT </b></h1>
 <h4 align="center">A Powerful, Smart And Simple Telegram Bot By Akku</h4>
 
 > **Warning** <br>
